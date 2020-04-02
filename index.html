@@ -1,0 +1,131 @@
+<div id="riskboxmini" style:'position:relative'>
+    <form>
+        <fieldset>
+            <legend>Risc Accounting Online Calculator</legend>
+            <label for="product">Choose a Product:</label>
+            <input list="product-list" id="product" placeholder="Type or select" size=42>
+            <datalist id="product-list">
+                <option value="FX Forwards">
+                <option value="Commercial Loans (Secured)">
+                <option value="Fixed Term Deposits">
+                <option value="Repos">
+                <option value="Cross Currency Swaps">
+                <option value="Futures">
+                <option value="Collateralised Debt Obligations (CDOs)">
+                <option value="Equities">
+                <option value="Fixed Income">
+                <option value="Payment Orders">
+            </datalist>
+            <label for="tval">Choose transaction value:</label>
+            <input id="tval" list="tval-list" size=42 placeholder="Select a value">
+            <datalist id="tval-list">
+                <option value="0 - 62500">
+                <option value="62500 - 125000">
+                <option value="125000 - 250000">
+                <option value="250000 - 500000">
+                <option value="500000 - 1000000">
+                <option value="1000000 - 2000000">
+                <option value="2000000 - 4000000">
+                <option value="4000000 - 8000000">
+                <option value="8000000 - 16000000">
+                <option value="16000000 - 32000000">
+                <option value="32000000 - 64000000">
+                <option value="64000000 - 128000000">
+                <option value="128000000 - 256000000">
+                <option value="256000000 - 512000000">
+                <option value="512000000 - 1024000000">
+                <option value="1024000000 - 2048000000">
+                <option value="2048000000 - 4096000000">
+                <option value="4096000000 - 8192000000">
+                <option value="8192000000 - 16384000000">
+                <option value="16384000000 - 32768000000">
+                <option value="32768000000 - 65536000000">
+                <option value="65536000000 - 131072000000">
+            </datalist>
+            <button type="button" onclick="computeIR()">Compute Inherent Risk</button>
+        </fieldset>
+    </form>
+    <div id="magicbox">
+        Result
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    function computeIR() {
+        var products = [
+            'FX Forwards'
+        , 'Commercial Loans (Secured)'
+        , 'Fixed Term Deposits'
+        , 'Repos'
+        , 'Cross Currency Swaps'
+        , 'Futures'
+        , 'Collateralised Debt Obligations (CDOs)'
+        , 'Equities'
+        , 'Fixed Income'
+        , 'Payment Orders'];
+        var product = products.indexOf(document.getElementById("product").value);
+
+        var euf = [31, 58, 15, 26, 33, 26, 85, 38, 38, 8];
+
+        var tvals = ['0 - 62500'
+            , '62500 - 125000'
+            , '125000 - 250000'
+            , '250000 - 500000'
+            , '500000 - 1000000'
+            , '1000000 - 2000000'
+            , '2000000 - 4000000'
+            , '4000000 - 8000000'
+            , '8000000 - 16000000'
+            , '16000000 - 32000000'
+            , '32000000 - 64000000'
+            , '64000000 - 128000000'
+            , '128000000 - 256000000'
+            , '256000000 - 512000000'
+            , '512000000 - 1024000000'
+            , '1024000000 - 2048000000'
+            , '2048000000 - 4096000000'
+            , '4096000000 - 8192000000'
+            , '8192000000 - 16384000000'
+            , '16384000000 - 32768000000'
+            , '32768000000 - 65536000000'
+            , '65536000000 - 131072000000'];
+
+        var vbw = [2
+            , 2.6
+            , 3.4
+            , 4.3
+            , 5.5
+            , 7.1
+            , 8.9
+            , 11.3
+            , 14.1
+            , 17.6
+            , 21.9
+            , 27
+            , 33.1
+            , 40.4
+            , 49.1
+            , 59.3
+            , 71.2
+            , 85
+            , 101
+            , 119.3
+            , 140.1
+            , 163.6];
+
+        var transaction_value = tvals.indexOf(document.getElementById("tval").value);
+
+        var divElement = document.getElementById('magicbox');
+
+        if (product != -1 && transaction_value != -1) {
+
+            divElement.innerHTML = "Inherent Risk: " + euf[product] * vbw[transaction_value] + " | EUF: " + euf[product] + " | VBW: " + vbw[transaction_value];
+
+        } else {
+            divElement.innerHTML = "Please select a product and a transaction value";
+
+        }
+    };
+
+</script>
