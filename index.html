@@ -1,5 +1,24 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/brutusin/json-forms@1.6.3/dist/css/brutusin-json-forms.min.css">
 <script src="https://cdn.jsdelivr.net/gh/brutusin/json-forms@1.6.3/dist/js/brutusin-json-forms.min.js"></script>
+<!-- Table formatting -->
+<style>
+table.tclass {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+table.tclass th, table.tclass td {
+  border: 1px solid black;
+}
+
+table.tclass tbody tr:nth-child(even) {background-color: #cebe61;}
+
+table.tclass tbody tr:hover {background-color: #f0ec12;}
+
+</style>
+
+
 <!--
 <div id="riskboxmini" style:'position:relative'>
     <form>
@@ -54,13 +73,23 @@
 
 </div>
 -->
+
 <div id="riskboxzone" style:'position:relative'>
 </div>
 
+<button type="button" onclick="computeNewIR()">Compute Inherent Risk</button>
+
+<div id="magicbox">
+    Inherent Risk Calculation Results will be displayed here ...
+</div>
+
+<div id="qcmzone"></div>
+
+
 <script type="text/javascript">
-    function computeIR() {
-        var products = [
-            'FX Forwards'
+
+    var products = [
+        'FX Forwards'
         , 'Commercial Loans (Secured)'
         , 'Fixed Term Deposits'
         , 'Repos'
@@ -69,78 +98,140 @@
         , 'Collateralised Debt Obligations (CDOs)'
         , 'Equities'
         , 'Fixed Income'
-        , 'Payment Orders'];
+        , 'Payment Orders'
+    ];
+
+    var tvals = ['0 - 62500'
+        , '62500 - 125000'
+        , '125000 - 250000'
+        , '250000 - 500000'
+        , '500000 - 1000000'
+        , '1000000 - 2000000'
+        , '2000000 - 4000000'
+        , '4000000 - 8000000'
+        , '8000000 - 16000000'
+        , '16000000 - 32000000'
+        , '32000000 - 64000000'
+        , '64000000 - 128000000'
+        , '128000000 - 256000000'
+        , '256000000 - 512000000'
+        , '512000000 - 1024000000'
+        , '1024000000 - 2048000000'
+        , '2048000000 - 4096000000'
+        , '4096000000 - 8192000000'
+        , '8192000000 - 16384000000'
+        , '16384000000 - 32768000000'
+        , '32768000000 - 65536000000'
+        , '65536000000 - 131072000000'
+    ];
+
+    var euf = [31, 58, 15, 26, 33, 26, 85, 38, 38, 8];
+    var vbw = [2, 2.6, 3.4, 4.3, 5.5, 7.1, 8.9, 11.3, 14.1
+            , 17.6, 21.9, 27, 33.1, 40.4, 49.1, 59.3, 71.2
+            , 85, 101, 119.3, 140.1, 163.6];
+
+    function computeIR() {
         var product = products.indexOf(document.getElementById("product").value);
-
-        var euf = [31, 58, 15, 26, 33, 26, 85, 38, 38, 8];
-
-        var tvals = ['0 - 62500'
-            , '62500 - 125000'
-            , '125000 - 250000'
-            , '250000 - 500000'
-            , '500000 - 1000000'
-            , '1000000 - 2000000'
-            , '2000000 - 4000000'
-            , '4000000 - 8000000'
-            , '8000000 - 16000000'
-            , '16000000 - 32000000'
-            , '32000000 - 64000000'
-            , '64000000 - 128000000'
-            , '128000000 - 256000000'
-            , '256000000 - 512000000'
-            , '512000000 - 1024000000'
-            , '1024000000 - 2048000000'
-            , '2048000000 - 4096000000'
-            , '4096000000 - 8192000000'
-            , '8192000000 - 16384000000'
-            , '16384000000 - 32768000000'
-            , '32768000000 - 65536000000'
-            , '65536000000 - 131072000000'];
-
-        var vbw = [2
-            , 2.6
-            , 3.4
-            , 4.3
-            , 5.5
-            , 7.1
-            , 8.9
-            , 11.3
-            , 14.1
-            , 17.6
-            , 21.9
-            , 27
-            , 33.1
-            , 40.4
-            , 49.1
-            , 59.3
-            , 71.2
-            , 85
-            , 101
-            , 119.3
-            , 140.1
-            , 163.6];
-
         var transaction_value = tvals.indexOf(document.getElementById("tval").value);
-
         var divElement = document.getElementById('magicbox');
 
         if (product != -1 && transaction_value != -1) {
-
             divElement.innerHTML = "Inherent Risk: " + euf[product] * vbw[transaction_value] + " | EUF: " + euf[product] + " | VBW: " + vbw[transaction_value];
-
         } else {
             divElement.innerHTML = "Please select a product and a transaction value";
-
         }
     };
 
-var schema = {"type": "boolean"};
-var data = {};
+var schema = {
+    "$schema": "http://json-schema.org/draft-03/schema#",
+    "type": "object",
+    "properties": {
+        "ir":{
+            "type": "array",
+            "title": "Inherent Risk by Product and Daily Transaction Volume",
+            "readOnly": true,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "product": {
+                        "type": "string",
+                        "title": "Product Type",
+                        "readOnly": true
+                    },
+                    "vbwval": {
+                        "type": "string",
+                        "title": "Transaction Value Band",
+                        "default": "0 - 62500",
+                        "required": true,
+                        "enum": tvals
+                    }
+                }
+            }
+        }
+
+    }
+};
+
+var container = document.getElementById('riskboxzone');
+
+var data = {
+    "ir": [
+    {"product": 'FX Forwards'}
+    ,{"product": 'Commercial Loans (Secured)'}
+    ,{"product": 'Fixed Term Deposits'}
+    ,{"product": 'Repos'}
+    ,{"product": 'Cross Currency Swaps'}
+    ,{"product": 'Futures'}
+    ,{"product": 'Collateralised Debt Obligations (CDOs)'}
+    ,{"product": 'Equities'}
+    ,{"product": 'Fixed Income'}
+    ,{"product": 'Payment Orders'}  
+    ]
+};
 var BrutusinForms = brutusin["json-forms"];
 var bf = BrutusinForms.create(schema);
-var container = document.getElementById('riskboxzone');
+
 bf.render(container, data);
-    
-    
-    
+
+    function computeNewIR(){
+        var form_data = bf.getData();
+        console.log(form_data);
+        //Draw a table with the Inherent Risk
+        var result= `<table class='tclass'>
+            <caption>Inherent Risk Calculation</caption>
+            <thead>
+                <th>Product</th>
+                <th>Transaction Value</th>
+                <th>EUF</th>
+                <th>VBW</th>
+                <th>IR</th>
+            </thead>
+            <tbody>`;
+        var divElement = document.getElementById("magicbox");
+        form_data.ir.forEach(element => {
+            result += "<tr><th scope='row' align='left'>" + element.product + "</th><td>" + 
+            element.vbwval + "</td><td>" + euf[products.indexOf(element.product)] + "</td><td>" +
+            vbw[tvals.indexOf(element.vbwval)] + "</td><td align='right'>" +
+            (euf[products.indexOf(element.product)]*vbw[tvals.indexOf(element.vbwval)]).toFixed(2) +
+            "</td></tr>";
+        });
+        result += "</tbody></table>";
+        divElement.innerHTML = result;
+    }
+
+var qcmschema = {
+    "$schema": "http://json-schema.org/draft-03/schema#",
+    "type": "object",
+    "properties": {
+        
+    }
+};
+
+var qcmcontainer = document.getElementById('qcmzone');
+var qcmdata = {};
+var BrutusinQCMForms = brutusin["json-forms"];
+var bfqcm = BrutusinQCMForms.create(qcmschema);
+bfqcm.render(cqcmontainer, qcmdata);
+
+
 </script>
