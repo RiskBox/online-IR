@@ -1,3 +1,6 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/brutusin/json-forms@1.6.3/dist/css/brutusin-json-forms.min.css">
+<script src="https://cdn.jsdelivr.net/gh/brutusin/json-forms@1.6.3/dist/js/brutusin-json-forms.min.js"></script>
+<!--
 <div id="riskboxmini" style:'position:relative'>
     <form>
         <fieldset>
@@ -49,6 +52,9 @@
         Result
     </div>
 
+</div>
+-->
+<div id="riskboxzone" style:'position:relative'>
 </div>
 
 <script type="text/javascript">
@@ -128,4 +134,12 @@
         }
     };
 
+var schema = {"type": "boolean"}
+var BrutusinForms = brutusin["json-forms"];
+var bf = BrutusinForms.create(schema);
+var container = document.getElementById('riskboxzone');
+bf.render(container, data);
+    
+    
+    
 </script>
